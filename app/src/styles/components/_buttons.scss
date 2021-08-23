@@ -2,11 +2,14 @@
 button {
   display: inline-block;
   height: rem-calc(48);
+  padding: rem-calc(0 42);
   font-weight: 600;
   font-size: rem-calc(16);
   line-height: rem-calc(24);
   text-align: center;
   color: $white;
+  outline: 0;
+  border: 0;
   border-radius: rem-calc(6);
   background: $blue;
   box-shadow: rem-calc(0 0 1) rgba(68, 80, 95, 0.08),
