@@ -1,0 +1,41 @@
+.Button,
+button {
+  display: inline-block;
+  height: rem-calc(48);
+  font-weight: 600;
+  font-size: rem-calc(16);
+  line-height: rem-calc(24);
+  text-align: center;
+  color: $white;
+  border-radius: rem-calc(6);
+  background: $blue;
+  box-shadow: rem-calc(0 0 1) rgba(68, 80, 95, 0.08),
+              rem-calc(0 1 4) rgba(68, 80, 95, 0.32);
+
+  &.--smaller {
+    height: rem-calc(40);  
+  }
+
+  &.--bordered {
+    background: $blue-lighter;
+    border: rem-calc(1) solid $blue-light;
+  }
+
+  i {
+    display: inline-block;
+    width: rem-calc(24);
+    height: auto;
+    vertical-align: middle;
+
+    svg,
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  span {
+    font-weight: normal;
+  }
+}
