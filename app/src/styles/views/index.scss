@@ -1,9 +1,10 @@
 .GuestPicker {
   display: flex;
-  flex-flow: column wrap;
-  align-items: flex-start;
-  justify-content: center;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: flex-start;
   height: 100vh;
+  overflow-y: scroll;
 
   &-header {
     display: flex;
@@ -26,21 +27,87 @@
 
   &-content {
     flex: 1;
-    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: auto;
+    max-height: calc(100% - 100px);
+    padding: rem-calc(0 16);
+    overflow-y: scroll;
+  }
+
+  &-rooms {
+    flex: 1;
+    width: 100%;
+    padding: rem-calc(0 0 22);
+    overflow-y: auto;
+  }
+
+  &-room {
+    padding-top: rem-calc(24);
+    padding-bottom: rem-calc(24);
+    border-bottom: rem-calc(1) solid $blue-light;
+  }
+
+  &-legend {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: rem-calc(18);
+    font-size: rem-calc(18);
+  }
+
+  &-option,
+  &-option-extra {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: rem-calc(16);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &-option-extra {
+    flex-flow: row wrap;
+    margin-top: rem-calc(16);
+    margin-bottom: 0;
+    
+    &:first-child {
+    }
+  }
+
+  &-qty {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      display: inline-block;
+      width: rem-calc(40);
+      height: rem-calc(40);
+      line-height: rem-calc(40);
+      text-align: center;
+    }
+  }
+
+  &-add-room {
+    display: block;
+    width: 100%;
   }
 
   &-footer {
-    // display: flex;
-    // flex-flow: row nowrap;
-    // align-items: center;
-    // justify-content: center;
-    // position: relative;
     width: 100%;
+    margin-top: auto;
     padding: rem-calc(20 16 32);
-    // height: rem-calc(64);
     background-color: $white;
-    // box-shadow: 0px 0px 1px rgba(68, 80, 95, 0.08),
-    //             0px 1px 4px rgba(68, 80, 95, 0.2);
 
     button {
       display: block;

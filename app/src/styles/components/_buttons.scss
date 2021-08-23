@@ -57,7 +57,9 @@ button {
     box-shadow: none;
   }
 
-  &.--red {
+  &.--link {
+    height: auto;
+    padding: rem-calc(0);
     color: $red;
   }
 
