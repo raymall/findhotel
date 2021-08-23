@@ -1,0 +1,50 @@
+// background-image: url('../assets/[image-name].[image-extension]');
+
+/*===============
+  VENDORS
+===============*/
+
+
+/*===============
+  SETTINGS
+===============*/
+@import 'settings/colors';
+@import 'settings/fonts';
+
+/*===============
+  UTILITIES
+===============*/
+@import 'utils/functions';
+@import 'utils/mixins';
+@import 'utils/helpers';
+
+/*===============
+  BASE
+===============*/
+body {
+  margin: 0;
+  padding: 0;
+  font-size: rem-calc(16);
+  font-family: sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@import 'base/reset';
+@import 'base/setup';
+@import 'base/typography';
+@import 'base/forms';
+
+/*===============
+  COMPONENTS
+===============*/
+@import 'components/buttons';
+
+/*===============
+  VIEWS
+===============*/
+@import 'views/index';
