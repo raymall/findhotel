@@ -1,0 +1,50 @@
+.GuestPicker {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100vh;
+
+  &-header {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: rem-calc(64);
+    background-color: $white;
+    box-shadow: 0px 0px 1px rgba(68, 80, 95, 0.08),
+                0px 1px 4px rgba(68, 80, 95, 0.2);
+
+    button {
+      position: absolute;
+      top: rem-calc(12);
+      left: 0;
+    }
+  }
+
+  &-content {
+    flex: 1;
+    height: 100%;
+  }
+
+  &-footer {
+    // display: flex;
+    // flex-flow: row nowrap;
+    // align-items: center;
+    // justify-content: center;
+    // position: relative;
+    width: 100%;
+    padding: rem-calc(20 16 32);
+    // height: rem-calc(64);
+    background-color: $white;
+    // box-shadow: 0px 0px 1px rgba(68, 80, 95, 0.08),
+    //             0px 1px 4px rgba(68, 80, 95, 0.2);
+
+    button {
+      display: block;
+      width: 100%;
+    }
+  }
+}
