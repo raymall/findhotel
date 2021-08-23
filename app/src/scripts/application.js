@@ -1,4 +1,4 @@
-'use strict'
+import { init as initRoomBuilder } from './views/index'
 
 /*===============
   VENDORS
@@ -8,4 +8,9 @@
 /*===============
   VIEWS
 ===============*/
-import './views/index.js';
+// import './views/index.js';
+const logErrors = (err) => {
+  console.error(err)
+}
+
+initRoomBuilder().catch(logErrors)
