@@ -1,8 +1,14 @@
 select {
+  -webkit-appearance: none;
+  appearance: none;
   display: inline-block;
   min-width: rem-calc(100);
   height: rem-calc(40);
+  padding-left: rem-calc(16);
   padding-right: rem-calc(40);
+  font-weight: 600;
+  font-size: rem-calc(16);
+  color: $black;
   border-radius: rem-calc(6);
   border: rem-calc(1) solid $blue-light;
   background: $white url('../assets/icon-arrow-down.svg') no-repeat center right 8px / 24px auto;

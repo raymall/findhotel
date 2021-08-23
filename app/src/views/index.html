@@ -6,12 +6,107 @@
   </head>
   <body>
     <!-- <img src="assets/[image-name].[image-extension]]"/> -->
-    <div class="grid-container full">
-      <div class="grid-x grid-padding-x">
-        <div class="cell small-12 medium-6 large-6">
-          <h1>Hello World!</h1>
+    <main class="GuestPicker">
+      <header>
+        <button class="--button --clear">
+          <i>
+            <img src="assets/icon-close.svg"/>
+          </i>
+        </button>
+        <span>Who is staying?</span>
+      </header>
+      <section class="GuestPicker-content">
+        <div class="GuestPicker-rooms"></div>
+          <div class="GuestPicker-room">
+            <div class="GuestPicker-header">
+              <span>Room 1</span>
+            </div>
+            <div class="GuestPicker-options">
+              <div class="GuestPicker-option">
+                <span>Adults</span>
+                <div class="GuestPicker-qty">
+                  <button class="--button --minus js-minus"></button>
+                  <span class="js-qty">2</span>
+                  <button class="--button --plus js-plus"></button>
+                </div>
+              </div>
+              <div class="GuestPicker-option">
+                <span>Childrens</span>
+                <div class="GuestPicker-qty">
+                  <button class="--button --minus js-minus"></button>
+                  <span class="js-qty">2</span>
+                  <button class="--button --plus js-plus"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="GuestPicker-room">
+            <div class="GuestPicker-header">
+              <span>Room 1</span>
+              <button class="--clear --red js-remove">Remove room</button>
+            </div>
+            <div class="GuestPicker-options">
+              <div class="GuestPicker-option">
+                <span>Adults</span>
+                <div class="GuestPicker-qty">
+                  <button class="--button --minus js-minus"></button>
+                  <span class="js-qty">2</span>
+                  <button class="--button --plus js-plus"></button>
+                </div>
+              </div>
+              <div class="GuestPicker-option">
+                <span>Childrens</span>
+                <div class="GuestPicker-qty">
+                  <button class="--button --minus js-minus"></button>
+                  <span class="js-qty">2</span>
+                  <button class="--button --plus js-plus"></button>
+                </div>
+                <div class="GuestPicker-option-extra">
+                  <span>Child 1 Age</span>
+                  <div class="GuestPicker-qty">
+                    <select name="child-age" id="">
+                      <option value="">Age</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                    </select>
+                    <button class="--button --clear --remove js-remove"></button>
+                  </div>
+                </div>
+                <div class="GuestPicker-option-extra">
+                  <span>Child 1 Age</span>
+                  <div class="GuestPicker-qty">
+                    <select name="child-age" id="">
+                      <option value="">Age</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                    </select>
+                    <button class="--button --clear --remove js-remove"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+
+        <button class="--bordered">
+          <i>
+            <img src="assets/icon-plus.svg"/>
+          </i>
+          Add Room
+        </button>
+      </section>
+      <footer>
+        <button>
+          <i>
+            <img src="assets/icon-search.svg"/>
+          </i>
+          Search
+          <span class="js-room-guest-counter">
+            <span class="js-room-counter">1</span> rooms • <span class="js-guest-counter">2</span> guests
+          </span>
+        </button>
+      </footer>
+    </main>
   </body>
 </html>
