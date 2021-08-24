@@ -1,4 +1,4 @@
-import { init as initRoomBuilder } from './views/index'
+import { init as initGuestPicker } from './views/index'
 
 /*===============
   VENDORS
@@ -13,4 +13,4 @@ const logErrors = (err) => {
   console.error(err)
 }
 
-initRoomBuilder().catch(logErrors)
+initGuestPicker().catch(logErrors)

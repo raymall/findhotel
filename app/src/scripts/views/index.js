@@ -22,8 +22,20 @@ export const init = async () => {
   let ROOMS = [NEW_ROOM]
   let ROOM_QTY = ROOMS.length - 1
 
-  let Session = {
-    constructURL: () => {
+  let GuestPicker = {
+    buildRooms: () => {
+      let currentURL = new URI(window.location.href)
+      if (currentURL.hasQuery('search')) {
+        GuestPicker.updateRoomsFromUrl(currentURL.search(true)['search'])
+      } else {
+        new Room({
+          adults: 2,
+          children: []
+        }).createRoom()
+      }
+    },
+
+    updateRoomsUrl: () => {
       var newSearchUrlParam = ''
       forEach(ROOMS, (value, indexRoom) => {
         newSearchUrlParam += value.adults
@@ -49,7 +61,7 @@ export const init = async () => {
       window.history.pushState({}, '', window.location.origin + '?search=' + newSearchUrlParam);
     },
 
-    deconstructURL: (searchUrlParam) => {
+    updateRoomsFromUrl: (searchUrlParam) => {
       var SEARCH_ROOMS = []
       var rooms = searchUrlParam.split('|')
       forEach(rooms, (value, indexRoom) => {
@@ -74,11 +86,7 @@ export const init = async () => {
       })
 
       ROOMS = SEARCH_ROOMS
-      Session.updateRooms()
-    },
-
-    searchRooms: () => {
-      Session.constructURL()
+      GuestPicker.updateRooms()
     },
 
     updateRoomsGuests: () => {
@@ -96,27 +104,27 @@ export const init = async () => {
       for (let i = 0; i < ROOMS.length; i++) {
         new Room(ROOMS[i]).createRoom()
       }
-      Session.updateRoomsGuests()
+      GuestPicker.updateRoomsGuests()
+    },
+
+    deleteRoom: (room) => {
+      $('.js-room[data-room=' + room + ']').remove()
+      ROOMS.splice(room - 1, 1)
+      GuestPicker.updateRooms()
+    },
+
+    updateChild: (room, child, value) => {
+      ROOMS[room - 1].children[child] = value
+      GuestPicker.updateRooms()
     },
 
     deleteChild: (room, child) => {
       $('.js-room[data-room=' + room + '] .js-child[data-child=' + child + ']').remove()
       ROOMS[room - 1].children.splice(child, 1)
-      Session.updateRooms()
-    },
-
-    updateChild: (room, child, value) => {
-      ROOMS[room - 1].children[child] = value
-      Session.updateRooms()
-    },
-
-    deleteRoom: (room) => {
-      $('.js-room[data-room=' + room + ']').remove()
-      let room_index = ROOMS.indexOf(room - 1)
-      ROOMS.splice(room - 1, 1)
-      Session.updateRooms()
+      GuestPicker.updateRooms()
     }
   }
+
 
   class Room {
     constructor(room) {
@@ -137,16 +145,16 @@ export const init = async () => {
       `
     }
 
-    getChildrenOptionAges(childrenAge) {
-      let childrenAgesOptions = ``
+    getChildOption(childrenAge) {
+      let childAgesOptions = ``
       for (let i = 0; i < MAX_CHILDREN_AGE; i++) {
         let age = i + 1
-        childrenAgesOptions += `
+        childAgesOptions += `
           <option value="${age}" ${(childrenAge == age) ? 'selected' : ''}>${age}</option>
         `
       }
 
-      return childrenAgesOptions
+      return childAgesOptions
     }
 
     getChild(room) {
@@ -157,19 +165,15 @@ export const init = async () => {
             <span>Child ${i + 1} Age</span>
             <div class="GuestPicker-qty">
               <select name="child-age" id="" data-room="${room}" data-child="${i}">
-                ${this.getChildrenOptionAges(this.children[i])}
+                ${this.getChildOption(this.children[i])}
               </select>
-              <button class="--button --clear --remove js-remove" data-room="${room}" data-child="${i}"></button>
+              <button class="--button --clear --remove js-remove-child" data-room="${room}" data-child="${i}"></button>
             </div>
           </div>
         `
       }
       
       return childrenLayout
-    }
-
-    getRoom() {
-
     }
 
     createRoom() {
@@ -185,17 +189,17 @@ export const init = async () => {
             <div class="GuestPicker-option">
               <span>Adults</span>
               <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus" data-action="minus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --minus js-minus" ${ this.adults === 1 ? 'disabled' : '' } data-action="minus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
                 <span class="js-qty">${ this.adults }</span>
-                <button class="--button --plus js-plus" data-action="plus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --plus js-plus" ${ (this.adults + this.children.length === MAX_OCCUPANCY) ? 'disabled' : '' } data-action="plus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
               </div>
             </div>
             <div class="GuestPicker-option">
               <span>Childrens</span>
               <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus" data-action="minus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --minus js-minus" ${ this.children.length === 0 ? 'disabled' : '' } data-action="minus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
                 <span class="js-qty">${ this.children.length }</span>
-                <button class="--button --plus js-plus" data-action="plus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --plus js-plus" ${ (this.adults + this.children.length === MAX_OCCUPANCY || this.children.length === MAX_CHILDREN) ? 'disabled' : '' } data-action="plus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
               </div>
               ${this.getChild(ROOM_QTY)}
             </div>
@@ -204,16 +208,25 @@ export const init = async () => {
       `)
     }
   }
-  
-  let currentURL = new URI(window.location.href)
-  if (currentURL.hasQuery('search')) {
-    Session.deconstructURL(currentURL.search(true)['search'])
-  } else {
-    new Room({
-      adults: 2,
-      children: []
-    }).createRoom()
-  }
+
+  GuestPicker.buildRooms()
+
+  $('.js-search').on('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    GuestPicker.updateRoomsGuests()
+    GuestPicker.updateRoomsUrl()
+  })
+
+  $('.js-reset').on('click', (e) => {
+    e.preventDefault()
+    let NEW_ROOM = INIT_ROOM
+    ROOMS = [NEW_ROOM]
+    ROOM_QTY = ROOMS.length - 1
+    $('.js-rooms').empty()
+    GuestPicker.buildRooms()
+    window.history.pushState({}, '', window.location.origin);
+  })
 
   $('.js-add-room').on('click', (e) => {
     e.preventDefault()
@@ -223,33 +236,26 @@ export const init = async () => {
         children: []
       }
       ROOMS.push(new_room)
-      Session.updateRooms()
+      GuestPicker.updateRooms()
     }
   })
 
   $(document).on('click', '.js-remove-room', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    Session.deleteRoom($(e.target).data('room'))
+    GuestPicker.deleteRoom($(e.target).data('room'))
   })
 
-  $(document).on('click', '.js-remove', (e) => {
+  $(document).on('click', '.js-remove-child', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    Session.deleteChild($(e.target).data('room'), $(e.target).data('child'))
+    GuestPicker.deleteChild($(e.target).data('room'), $(e.target).data('child'))
   })
 
   $(document).on('change', '.js-child', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    Session.updateChild($(e.target).data('room'), $(e.target).data('child'), $(e.target).val())
-  })
-
-  $('.js-search').on('click', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    Session.updateRoomsGuests()
-    Session.searchRooms()
+    GuestPicker.updateChild($(e.target).data('room'), $(e.target).data('child'), $(e.target).val())
   })
 
   $(document).on('click', '[data-action]', (e) => {
@@ -290,6 +296,6 @@ export const init = async () => {
       }
     }
 
-    Session.updateRooms()
+    GuestPicker.updateRooms()
   })
 }

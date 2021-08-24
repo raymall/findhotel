@@ -45,6 +45,10 @@ button {
     &.--plus { background-image: url('../assets/icon-plus.svg'); }
     &.--remove { background-image: url('../assets/icon-close-red.svg'); }
 
+    &:disabled {
+      opacity: 0.25;
+    }
+
     i {
       top: rem-calc(-1);
     }
