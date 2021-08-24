@@ -137,24 +137,26 @@ export const init = async () => {
         <div class="GuestPicker-option">
           <span>Adults</span>
           <div class="GuestPicker-qty">
-            <button class="--button --minus js-minus"></button>
+            <button class="--button --minus js-minus" ${ this.adults === 1 ? 'disabled' : '' } data-action="minus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
             <span class="js-qty">${ this.adults }</span>
-            <button class="--button --plus js-plus"></button>
+            <button class="--button --plus js-plus" ${ (this.adults + this.children.length === MAX_OCCUPANCY) ? 'disabled' : '' } data-action="plus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
           </div>
         </div>
       `
     }
 
-    getChildOption(childrenAge) {
-      let childAgesOptions = ``
-      for (let i = 0; i < MAX_CHILDREN_AGE; i++) {
-        let age = i + 1
-        childAgesOptions += `
-          <option value="${age}" ${(childrenAge == age) ? 'selected' : ''}>${age}</option>
-        `
-      }
-
-      return childAgesOptions
+    getChildren() {
+      return `
+        <div class="GuestPicker-option">
+          <span>Childrens</span>
+          <div class="GuestPicker-qty">
+            <button class="--button --minus js-minus" ${ this.children.length === 0 ? 'disabled' : '' } data-action="minus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
+            <span class="js-qty">${ this.children.length }</span>
+            <button class="--button --plus js-plus" ${ (this.adults + this.children.length === MAX_OCCUPANCY || this.children.length === MAX_CHILDREN) ? 'disabled' : '' } data-action="plus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
+          </div>
+          ${this.getChild(ROOM_QTY)}
+        </div>
+      `
     }
 
     getChild(room) {
@@ -176,9 +178,20 @@ export const init = async () => {
       return childrenLayout
     }
 
+    getChildOption(childrenAge) {
+      let childAgesOptions = ``
+      for (let i = 0; i < MAX_CHILDREN_AGE; i++) {
+        let age = i + 1
+        childAgesOptions += `
+          <option value="${age}" ${(childrenAge == age) ? 'selected' : ''}>${age}</option>
+        `
+      }
+
+      return childAgesOptions
+    }
+
     createRoom() {
       ROOM_QTY++
-
       $('.js-rooms').append(`
         <div class="GuestPicker-room js-room" data-room="${ ROOM_QTY }">
           <div class="GuestPicker-legend">
@@ -186,23 +199,8 @@ export const init = async () => {
             ${(ROOM_QTY > 1) ? '<button class="--clear --link js-remove-room" data-room="' + ROOM_QTY + '">Remove room</button>' : ''}
           </div>
           <div class="GuestPicker-options">
-            <div class="GuestPicker-option">
-              <span>Adults</span>
-              <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus" ${ this.adults === 1 ? 'disabled' : '' } data-action="minus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
-                <span class="js-qty">${ this.adults }</span>
-                <button class="--button --plus js-plus" ${ (this.adults + this.children.length === MAX_OCCUPANCY) ? 'disabled' : '' } data-action="plus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
-              </div>
-            </div>
-            <div class="GuestPicker-option">
-              <span>Childrens</span>
-              <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus" ${ this.children.length === 0 ? 'disabled' : '' } data-action="minus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
-                <span class="js-qty">${ this.children.length }</span>
-                <button class="--button --plus js-plus" ${ (this.adults + this.children.length === MAX_OCCUPANCY || this.children.length === MAX_CHILDREN) ? 'disabled' : '' } data-action="plus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
-              </div>
-              ${this.getChild(ROOM_QTY)}
-            </div>
+            ${this.getAdults()}
+            ${this.getChildren()}
           </div>
         </div>
       `)
