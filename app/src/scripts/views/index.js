@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'lodash'
+import forEach from 'lodash/forEach'
 
 export const init = async () => {
   const INIT_ADULTS = 2
@@ -7,7 +7,7 @@ export const init = async () => {
   const INIT_ROOM = {
     adults: INIT_ADULTS,
     children: INIT_CHILDREN
-    // children: [{age: 5}, {age: 4}]
+    // children: [5, 4]
   }
   const MAX_ROOMS = 8
   const MAX_OCCUPANCY = 5
@@ -20,8 +20,35 @@ export const init = async () => {
   let NEW_ROOM = INIT_ROOM
   let ROOMS = [NEW_ROOM]
   let ROOM_QTY = ROOMS.length - 1
+  let URL = '1:4,6|3'
 
   let Session = {
+    deconstructURL: (searchUrlParams) => {
+      var SEARCH_ROOMS = []
+      var rooms = searchUrlParams.split('|')
+      forEach(rooms, (value, indexRoom) => {
+        SEARCH_ROOMS[indexRoom] = {}
+        SEARCH_ROOMS[indexRoom]['adults'] = parseFloat(rooms[indexRoom])
+
+        if (value.includes(':')) {
+          var occupants = value.split(':')
+          forEach(occupants, (value) => {
+            SEARCH_ROOMS[indexRoom]['adults'] = parseFloat(occupants[indexRoom])
+  
+            if (value.includes(',')) {
+              var ages = value.split(',')
+              SEARCH_ROOMS[indexRoom]['ages'] = []
+              forEach(ages, (value, indexAges) => {
+                SEARCH_ROOMS[indexRoom]['ages'][indexAges] = parseFloat(value)
+              })
+            }
+          })
+        }
+      })
+
+      console.log(SEARCH_ROOMS)
+    },
+
     updateRooms: () => {
       $('.js-rooms').empty()
       ROOM_QTY = 0
@@ -30,11 +57,21 @@ export const init = async () => {
       }
     },
 
+    deleteChild: (room, child) => {
+      $('.js-room[data-room=' + room + '] .js-child[data-child=' + child + ']').remove()
+      ROOMS[room - 1].children.splice(child, 1)
+      Session.updateRooms()
+    },
+
+    updateChild: (room, child, value) => {
+      ROOMS[room - 1].children[child] = value
+      Session.updateRooms()
+    },
+
     deleteRoom: (room) => {
       $('.js-room[data-room=' + room + ']').remove()
       let room_index = ROOMS.indexOf(room - 1)
       ROOMS.splice(parseFloat(room_index), 1)
-      console.log(ROOMS)
       Session.updateRooms()
     }
   }
@@ -74,13 +111,13 @@ export const init = async () => {
       let childrenLayout = ``
       for (let i = 0; i < this.children.length; i++) {
         childrenLayout += `
-          <div class="GuestPicker-option-extra" data-child="${i}">
+          <div class="GuestPicker-option-extra js-child" data-child="${i}">
             <span>Child ${i + 1} Age</span>
             <div class="GuestPicker-qty">
-              <select name="child-age" id="">
-                ${this.getChildrenOptionAges(this.children[i].age)}
+              <select name="child-age" id="" data-room="${room}" data-child="${i}">
+                ${this.getChildrenOptionAges(this.children[i])}
               </select>
-              <button class="--button --clear --remove js-remove" data-room="${room}"></button>
+              <button class="--button --clear --remove js-remove" data-room="${room}" data-child="${i}"></button>
             </div>
           </div>
         `
@@ -106,17 +143,17 @@ export const init = async () => {
             <div class="GuestPicker-option">
               <span>Adults</span>
               <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus" data-action="minus" data-guest="adult" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --minus js-minus" data-action="minus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
                 <span class="js-qty">${ this.adults }</span>
-                <button class="--button --plus js-plus" data-action="plus" data-guest="adult" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --plus js-plus" data-action="plus" data-occupant="adult" data-room="${ ROOM_QTY }"></button>
               </div>
             </div>
             <div class="GuestPicker-option">
               <span>Childrens</span>
               <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus" data-action="minus" data-guest="children" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --minus js-minus" data-action="minus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
                 <span class="js-qty">${ this.children.length }</span>
-                <button class="--button --plus js-plus" data-action="plus" data-guest="children" data-room="${ ROOM_QTY }"></button>
+                <button class="--button --plus js-plus" data-action="plus" data-occupant="children" data-room="${ ROOM_QTY }"></button>
               </div>
               ${this.getChild(ROOM_QTY)}
             </div>
@@ -130,6 +167,7 @@ export const init = async () => {
     adults: 2,
     children: []
   }).createRoom()
+  Session.deconstructURL(URL)
 
   $('.js-add-room').on('click', (e) => {
     e.preventDefault()
@@ -139,7 +177,6 @@ export const init = async () => {
         children: []
       }
       ROOMS.push(new_room)
-      console.log(ROOMS)
       new Room(new_room).createRoom()
     }
   })
@@ -153,20 +190,26 @@ export const init = async () => {
   $(document).on('click', '.js-remove', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    Session.deleteRoom($(e.target).data('room'))
+    Session.deleteChild($(e.target).data('room'), $(e.target).data('child'))
+  })
+
+  $(document).on('change', '.js-child', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    Session.updateChild($(e.target).data('room'), $(e.target).data('child'), $(e.target).val())
   })
 
   $(document).on('click', '[data-action]', (e) => {
     e.preventDefault()
     e.stopPropagation()
     let action = $(e.target).data('action')
-    let guest = $(e.target).data('guest')
+    let occupant = $(e.target).data('occupant')
     let room = ROOMS[$(e.target).data('room') - 1]
     let adultsQty = room.adults
     let childrenQty = room.children
     let remainingOccupancy = (adultsQty + childrenQty.length) < MAX_OCCUPANCY
 
-    if (guest === "adult") {
+    if (occupant === "adult") {
       switch (action) {
         case 'minus':
           if (adultsQty > MIN_ADULTS) {
@@ -179,7 +222,7 @@ export const init = async () => {
           }
           break;
       }
-    } else if (guest === "children") {
+    } else if (occupant === "children") {
       switch (action) {
         case 'minus':
           if (childrenQty.length > MIN_CHILDREN) {
@@ -188,7 +231,7 @@ export const init = async () => {
           break;
         case 'plus':
           if (childrenQty.length < MAX_CHILDREN && remainingOccupancy) {
-            room.children.push({age: 1})
+            room.children.push(1)
           }
           break;
       }
