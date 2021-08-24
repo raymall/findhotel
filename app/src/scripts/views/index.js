@@ -21,12 +21,37 @@ export const init = async () => {
   let NEW_ROOM = INIT_ROOM
   let ROOMS = [NEW_ROOM]
   let ROOM_QTY = ROOMS.length - 1
-  let URL = '1:4,6|3'
 
   let Session = {
-    deconstructURL: (searchUrlParams) => {
+    constructURL: () => {
+      var newSearchUrlParam = ''
+      forEach(ROOMS, (value, indexRoom) => {
+        newSearchUrlParam += value.adults
+
+        var childrenArr = value.children
+        if (childrenArr.length > 0) {
+          newSearchUrlParam += ':'
+        }
+
+        forEach(childrenArr, (value, indexChildren) => {
+          if (indexChildren !== (childrenArr.length - 1)) {
+            newSearchUrlParam += value + ','
+          } else {
+            newSearchUrlParam += value
+          }
+        })
+
+        if (indexRoom !== (ROOMS.length - 1)) {
+          newSearchUrlParam += '|'
+        }
+      })
+
+      window.history.pushState({}, '', window.location.origin + '?search=' + newSearchUrlParam);
+    },
+
+    deconstructURL: (searchUrlParam) => {
       var SEARCH_ROOMS = []
-      var rooms = searchUrlParams.split('|')
+      var rooms = searchUrlParam.split('|')
       forEach(rooms, (value, indexRoom) => {
         SEARCH_ROOMS[indexRoom] = {}
         SEARCH_ROOMS[indexRoom]['adults'] = parseFloat(rooms[indexRoom])
@@ -34,9 +59,9 @@ export const init = async () => {
 
         if (value.includes(':')) {
           var occupants = value.split(':')
+          SEARCH_ROOMS[indexRoom]['adults'] = parseFloat(occupants[0])
+          SEARCH_ROOMS[indexRoom]['children'][0] = parseFloat(occupants[1])
           forEach(occupants, (value) => {
-            SEARCH_ROOMS[indexRoom]['adults'] = parseFloat(occupants[indexRoom])
-  
             if (value.includes(',')) {
               var ages = value.split(',')
               SEARCH_ROOMS[indexRoom]['children'] = []
@@ -48,9 +73,21 @@ export const init = async () => {
         }
       })
 
-      console.log(SEARCH_ROOMS)
       ROOMS = SEARCH_ROOMS
       Session.updateRooms()
+    },
+
+    searchRooms: () => {
+      Session.constructURL()
+    },
+
+    updateRoomsGuests: () => {
+      let allOccupants = 0
+      forEach(ROOMS, (value) => {
+        allOccupants += value.adults + value.children.length
+      })
+      $('.js-room-counter').html(ROOMS.length + ' room' + (ROOMS.length > 1 ? 's': ''))
+      $('.js-guest-counter').html(allOccupants + ' guest' + (allOccupants > 1 ? 's': ''))
     },
 
     updateRooms: () => {
@@ -59,6 +96,7 @@ export const init = async () => {
       for (let i = 0; i < ROOMS.length; i++) {
         new Room(ROOMS[i]).createRoom()
       }
+      Session.updateRoomsGuests()
     },
 
     deleteChild: (room, child) => {
@@ -75,7 +113,7 @@ export const init = async () => {
     deleteRoom: (room) => {
       $('.js-room[data-room=' + room + ']').remove()
       let room_index = ROOMS.indexOf(room - 1)
-      ROOMS.splice(parseFloat(room_index), 1)
+      ROOMS.splice(room - 1, 1)
       Session.updateRooms()
     }
   }
@@ -169,8 +207,7 @@ export const init = async () => {
   
   let currentURL = new URI(window.location.href)
   if (currentURL.hasQuery('search')) {
-    // console.log(currentURL.search(true)['search'])
-    Session.deconstructURL(URL)
+    Session.deconstructURL(currentURL.search(true)['search'])
   } else {
     new Room({
       adults: 2,
@@ -186,7 +223,7 @@ export const init = async () => {
         children: []
       }
       ROOMS.push(new_room)
-      new Room(new_room).createRoom()
+      Session.updateRooms()
     }
   })
 
@@ -206,6 +243,13 @@ export const init = async () => {
     e.preventDefault()
     e.stopPropagation()
     Session.updateChild($(e.target).data('room'), $(e.target).data('child'), $(e.target).val())
+  })
+
+  $('.js-search').on('click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    Session.updateRoomsGuests()
+    Session.searchRooms()
   })
 
   $(document).on('click', '[data-action]', (e) => {
@@ -245,7 +289,6 @@ export const init = async () => {
           break;
       }
     }
-
 
     Session.updateRooms()
   })
