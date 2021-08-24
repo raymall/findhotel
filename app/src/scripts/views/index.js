@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import forEach from 'lodash/forEach'
+import URI from 'urijs'
 
 export const init = async () => {
   const INIT_ADULTS = 2
@@ -29,6 +30,7 @@ export const init = async () => {
       forEach(rooms, (value, indexRoom) => {
         SEARCH_ROOMS[indexRoom] = {}
         SEARCH_ROOMS[indexRoom]['adults'] = parseFloat(rooms[indexRoom])
+        SEARCH_ROOMS[indexRoom]['children'] = []
 
         if (value.includes(':')) {
           var occupants = value.split(':')
@@ -37,9 +39,9 @@ export const init = async () => {
   
             if (value.includes(',')) {
               var ages = value.split(',')
-              SEARCH_ROOMS[indexRoom]['ages'] = []
+              SEARCH_ROOMS[indexRoom]['children'] = []
               forEach(ages, (value, indexAges) => {
-                SEARCH_ROOMS[indexRoom]['ages'][indexAges] = parseFloat(value)
+                SEARCH_ROOMS[indexRoom]['children'][indexAges] = parseFloat(value)
               })
             }
           })
@@ -47,6 +49,8 @@ export const init = async () => {
       })
 
       console.log(SEARCH_ROOMS)
+      ROOMS = SEARCH_ROOMS
+      Session.updateRooms()
     },
 
     updateRooms: () => {
@@ -163,11 +167,16 @@ export const init = async () => {
     }
   }
   
-  new Room({
-    adults: 2,
-    children: []
-  }).createRoom()
-  Session.deconstructURL(URL)
+  let currentURL = new URI(window.location.href)
+  if (currentURL.hasQuery('search')) {
+    // console.log(currentURL.search(true)['search'])
+    Session.deconstructURL(URL)
+  } else {
+    new Room({
+      adults: 2,
+      children: []
+    }).createRoom()
+  }
 
   $('.js-add-room').on('click', (e) => {
     e.preventDefault()
