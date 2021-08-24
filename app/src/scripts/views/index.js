@@ -1,9 +1,14 @@
 import $ from 'jquery';
+import _ from 'lodash'
 
 export const init = async () => {
-  const INIT_ROOMS = 1
   const INIT_ADULTS = 2
   const INIT_CHILDREN = 0
+  const INIT_ROOM = {
+    adults: INIT_ADULTS,
+    children: INIT_CHILDREN
+    // children: [{age: 5}, {age: 4}]
+  }
   const MAX_ROOMS = 8
   const MAX_OCCUPANCY = 5
   const MIN_ADULTS = 1
@@ -12,12 +17,31 @@ export const init = async () => {
   const MAX_CHILDREN = 3
   const MAX_CHILDREN_AGE = 12
 
-  let ROOM_QTY = 0
+  let ROOMS = [INIT_ROOM]
+  let ROOM_QTY = ROOMS.length - 1
 
-  class GuestPicker {
-    constructor(adults, children) {
-      this.adults = adults;
-      this.children = children;
+  let Session = {
+    updateRooms: () => {
+      $('.js-rooms').empty()
+      ROOM_QTY = 0
+      for (let i = 0; i < ROOMS.length; i++) {
+        new Room(ROOMS[i]).createRoom()
+      }
+    },
+
+    deleteRoom: (room) => {
+      $('.js-room[data-room=' + room + ']').remove()
+      let room_index = ROOMS.indexOf(room - 1)
+      ROOMS.splice(parseFloat(room_index), 1)
+      console.log(ROOMS)
+      Session.updateRooms()
+    }
+  }
+
+  class Room {
+    constructor(room) {
+      this.adults = room.adults
+      this.children = room.children
     }
 
     getAdults() {
@@ -34,7 +58,7 @@ export const init = async () => {
     }
 
     getChildrenOptionAges(childrenAge) {
-      var childrenAgesOptions = ``
+      let childrenAgesOptions = ``
       for (let i = 0; i < MAX_CHILDREN_AGE; i++) {
         let age = i + 1
         childrenAgesOptions += `
@@ -46,7 +70,7 @@ export const init = async () => {
     }
 
     getChild() {
-      var childrenLayout = ``
+      let childrenLayout = ``
       for (let i = 0; i < this.children.length; i++) {
         childrenLayout += `
           <div class="GuestPicker-option-extra">
@@ -64,11 +88,14 @@ export const init = async () => {
       return childrenLayout
     }
 
+    getRoom() {
+
+    }
+
     createRoom() {
       ROOM_QTY++
 
-      $('.js-rooms')
-      .append(`
+      $('.js-rooms').append(`
         <div class="GuestPicker-room js-room" data-room="${ ROOM_QTY }">
           <div class="GuestPicker-legend">
             <span>Room ${ ROOM_QTY }</span>
@@ -97,24 +124,20 @@ export const init = async () => {
       `)
     }
 
-    deleteRoom(room) {
-      $('.js-room[data-room=' + room + ']').remove()
-    }
-
   }
-
-  // let sessionGuestPicker = new GuestPicker(INIT_ADULTS, [{age: 5}, {age: 4}])
-  let sessionGuestPicker = new GuestPicker(INIT_ADULTS, INIT_CHILDREN)
-  sessionGuestPicker.createRoom()
+  
+  new Room(INIT_ROOM).createRoom()
 
   $('.js-add-room').on('click', (e) => {
     e.preventDefault()
-    sessionGuestPicker.createRoom()
+    ROOMS.push(INIT_ROOM)
+    console.log(ROOMS)
+    new Room(INIT_ROOM).createRoom()
   })
 
   $(document).on('click', '.js-remove-room', (e) => {
     e.preventDefault()
-    console.log('here', $(e.target).data('room'))
-    sessionGuestPicker.deleteRoom($(e.target).data('room'))
+    e.stopPropagation()
+    Session.deleteRoom($(e.target).data('room'))
   })
 }
