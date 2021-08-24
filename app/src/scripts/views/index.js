@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 export const init = async () => {
   const INIT_ADULTS = 2
-  const INIT_CHILDREN = 0
+  const INIT_CHILDREN = []
   const INIT_ROOM = {
     adults: INIT_ADULTS,
     children: INIT_CHILDREN
@@ -17,7 +17,8 @@ export const init = async () => {
   const MAX_CHILDREN = 3
   const MAX_CHILDREN_AGE = 12
 
-  let ROOMS = [INIT_ROOM]
+  let NEW_ROOM = INIT_ROOM
+  let ROOMS = [NEW_ROOM]
   let ROOM_QTY = ROOMS.length - 1
 
   let Session = {
@@ -69,17 +70,17 @@ export const init = async () => {
       return childrenAgesOptions
     }
 
-    getChild() {
+    getChild(room) {
       let childrenLayout = ``
       for (let i = 0; i < this.children.length; i++) {
         childrenLayout += `
-          <div class="GuestPicker-option-extra">
+          <div class="GuestPicker-option-extra" data-child="${i}">
             <span>Child ${i + 1} Age</span>
             <div class="GuestPicker-qty">
               <select name="child-age" id="">
                 ${this.getChildrenOptionAges(this.children[i].age)}
               </select>
-              <button class="--button --clear --remove js-remove"></button>
+              <button class="--button --clear --remove js-remove" data-room="${room}"></button>
             </div>
           </div>
         `
@@ -105,39 +106,95 @@ export const init = async () => {
             <div class="GuestPicker-option">
               <span>Adults</span>
               <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus"></button>
-                <span class="js-qty">${ INIT_ADULTS }</span>
-                <button class="--button --plus js-plus"></button>
+                <button class="--button --minus js-minus" data-action="minus" data-guest="adult" data-room="${ ROOM_QTY }"></button>
+                <span class="js-qty">${ this.adults }</span>
+                <button class="--button --plus js-plus" data-action="plus" data-guest="adult" data-room="${ ROOM_QTY }"></button>
               </div>
             </div>
             <div class="GuestPicker-option">
               <span>Childrens</span>
               <div class="GuestPicker-qty">
-                <button class="--button --minus js-minus"></button>
-                <span class="js-qty">${ INIT_CHILDREN }</span>
-                <button class="--button --plus js-plus"></button>
+                <button class="--button --minus js-minus" data-action="minus" data-guest="children" data-room="${ ROOM_QTY }"></button>
+                <span class="js-qty">${ this.children.length }</span>
+                <button class="--button --plus js-plus" data-action="plus" data-guest="children" data-room="${ ROOM_QTY }"></button>
               </div>
-              ${this.getChild()}
+              ${this.getChild(ROOM_QTY)}
             </div>
           </div>
         </div>
       `)
     }
-
   }
   
-  new Room(INIT_ROOM).createRoom()
+  new Room({
+    adults: 2,
+    children: []
+  }).createRoom()
 
   $('.js-add-room').on('click', (e) => {
     e.preventDefault()
-    ROOMS.push(INIT_ROOM)
-    console.log(ROOMS)
-    new Room(INIT_ROOM).createRoom()
+    if (ROOMS.length < MAX_ROOMS) {
+      let new_room = {
+        adults: 2,
+        children: []
+      }
+      ROOMS.push(new_room)
+      console.log(ROOMS)
+      new Room(new_room).createRoom()
+    }
   })
 
   $(document).on('click', '.js-remove-room', (e) => {
     e.preventDefault()
     e.stopPropagation()
     Session.deleteRoom($(e.target).data('room'))
+  })
+
+  $(document).on('click', '.js-remove', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    Session.deleteRoom($(e.target).data('room'))
+  })
+
+  $(document).on('click', '[data-action]', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    let action = $(e.target).data('action')
+    let guest = $(e.target).data('guest')
+    let room = ROOMS[$(e.target).data('room') - 1]
+    let adultsQty = room.adults
+    let childrenQty = room.children
+    let remainingOccupancy = (adultsQty + childrenQty.length) < MAX_OCCUPANCY
+
+    if (guest === "adult") {
+      switch (action) {
+        case 'minus':
+          if (adultsQty > MIN_ADULTS) {
+            room.adults -= 1
+          }
+          break;
+        case 'plus':
+          if (adultsQty < MAX_ADULTS && remainingOccupancy) {
+            room.adults += 1
+          }
+          break;
+      }
+    } else if (guest === "children") {
+      switch (action) {
+        case 'minus':
+          if (childrenQty.length > MIN_CHILDREN) {
+            room.children.splice(-1,1);
+          }
+          break;
+        case 'plus':
+          if (childrenQty.length < MAX_CHILDREN && remainingOccupancy) {
+            room.children.push({age: 1})
+          }
+          break;
+      }
+    }
+
+
+    Session.updateRooms()
   })
 }
